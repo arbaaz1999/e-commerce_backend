@@ -1,7 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
-const user_router = require('./routes/user_route')
+const user_router = require('./routes/user_route');
+const error_handler = require('./middlewares/error_handler');
 
 
 connectDB();
@@ -15,6 +16,7 @@ app.get('/', async (req, res) => {
 })
 
 app.use('/v1/api/users', user_router)
+app.use(error_handler)
 
 app.listen(PORT, (err)=> {
     if(err) console.log(err)
