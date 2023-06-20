@@ -1,16 +1,11 @@
 const express = require('express');
+const dotenv = require('dotenv');
+dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 443;
+const PORT = process.env.PORT || 5000;
 
 app.get('/', async (req, res) => {
     res.send('Hello World!')
 })
 
-app.listen(PORT, function(err) {
-    if(err){
-        console.log(err)
-    }
-    else {
-        console.log('App is running on ', PORT)
-    }
-})
+app.listen(PORT)
