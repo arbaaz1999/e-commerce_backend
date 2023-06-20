@@ -7,6 +7,7 @@ const user_router = require('./routes/user_route')
 connectDB();
 dotenv.config();
 const app = express();
+app.use(express.json())
 const PORT = process.env.PORT || 5000;
 
 app.get('/', async (req, res) => {

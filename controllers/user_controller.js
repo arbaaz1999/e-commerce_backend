@@ -4,7 +4,6 @@ const User = require("../models/user_model");
 const jwt = require("jsonwebtoken");
 
 const create_user = asyncHandler(async (req, res) => {
-  console.log(req.body)
   const { first_name, last_name, email_id, mobile_no, password, is_admin, pic } = req.body;
 
   const userExist = await User.findOne({$or: [{email_id: email_id}, {mobile_no: mobile_no}]});
