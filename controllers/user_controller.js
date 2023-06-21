@@ -4,11 +4,12 @@ const User = require("../models/user_model");
 const jwt = require("jsonwebtoken");
 
 const create_user = asyncHandler(async (req, res) => {
+  console.log(req.hostname)
   const { first_name, last_name, email_id, mobile_no, password, is_admin, pic } = req.body;
 
-  const userExist = await User.findOne({$or: [{email_id: email_id}, {mobile_no: mobile_no}]});
+  const user_exist = await User.findOne({$or: [{email_id: email_id}, {mobile_no: mobile_no}]});
 
-  if (userExist) {
+  if (user_exist) {
     res.status(400);
     throw new Error("Email ID or Mobile already exist");
   }
