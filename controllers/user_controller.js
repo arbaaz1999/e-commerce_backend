@@ -4,14 +4,15 @@ const User = require("../models/user_model");
 const jwt = require("jsonwebtoken");
 
 const create_user = asyncHandler(async (req, res) => {
-  console.log(req.hostname)
+  console.log(`Original URL is ${req.url}, and protocol is ${req.protocol}`)
   const { first_name, last_name, email_id, mobile_no, password, is_admin, pic } = req.body;
 
   const user_exist = await User.findOne({$or: [{email_id: email_id}, {mobile_no: mobile_no}]});
 
   if (user_exist) {
-    res.status(400);
-    throw new Error("Email ID or Mobile already exist");
+    return res.status(403).json({
+      message: "Email or mobile is already exist"
+    })
   }
 
   const user = await User.create({
@@ -31,8 +32,9 @@ const create_user = asyncHandler(async (req, res) => {
       error: null,
     });
   } else {
-    res.status(400);
-    throw new Error("Error Occured!");
+    return res.status(400).json({
+      message: 'Some error occured!'
+    });
   }
 });
 

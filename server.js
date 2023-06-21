@@ -16,6 +16,8 @@ app.get('/', async (req, res) => {
 })
 
 app.use('/v1/api/users', user_router)
+
+
 app.use(error_handler)
 
 app.listen(PORT, (err)=> {
