@@ -71,13 +71,13 @@ const login_auth = asyncHandler(async (req, res) => {
 });
 
 const forgot_password = asyncHandler(async (req, res) => {
-  const {email_id} = req.body;
-  const user = User.findOne({email_id})
+  const { email_id } = req.body;
+  const user = User.findOne({ email_id })
 })
 
 const get_all_users = asyncHandler(async (req, res) => {
   const users = await User.find({})
-  if(users) {
+  if (users) {
     return res.status(200).json({
       message: "Users fetched successfully",
       data: users,
@@ -134,7 +134,7 @@ const updateProfile = async (req, res) => {
   }
 };
 
-const getUser = async (req, res) => {
+const get_user = async (req, res) => {
   try {
     console.log(req.userId);
     const user = await User.find({ _id: req.userId });
