@@ -70,6 +70,11 @@ const login_auth = asyncHandler(async (req, res) => {
   }
 });
 
+const forgot_password = asyncHandler(async (req, res) => {
+  const {email_id} = req.body;
+  const user = User.findOne({email_id})
+})
+
 const updateProfile = async (req, res) => {
   try {
     const { name, email, pic, password } = req.body;
