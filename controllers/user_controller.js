@@ -2,12 +2,13 @@ const bcrypt = require('bcrypt')
 const asyncHandler = require("express-async-handler");
 const User = require("../models/user_model");
 const jwt = require("jsonwebtoken");
+require('dotenv').config();
 
 const create_user = asyncHandler(async (req, res) => {
   console.log(`Original URL is ${req.url}, and protocol is ${req.protocol}`)
   const { first_name, last_name, email_id, mobile_no, password, is_admin, pic } = req.body;
 
-  const user_exist = await User.findOne({$or: [{email_id: email_id}, {mobile_no: mobile_no}]});
+  const user_exist = await User.findOne({ $or: [{ email_id: email_id }, { mobile_no: mobile_no }] });
 
   if (user_exist) {
     return res.status(403).json({
@@ -38,21 +39,23 @@ const create_user = asyncHandler(async (req, res) => {
   }
 });
 
-const loginAuth = asyncHandler(async (req, res) => {
+const login_auth = asyncHandler(async (req, res) => {
   console.log("isnide one");
   try {
-    const { email, password } = req.body;
+    const { email_id, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email_id });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      res.status(201).json({
+      return res.status(201).json({
         message: "Logged In Successfully",
         data: {
           _id: user._id,
-          name: user.name,
-          email: user.email,
-          isAdmin: user.isAdmin,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email_id: user.email_id,
+          mobile_no: user.mobile_no,
+          is_admin: user.is_admin,
           pic: user.pic,
           token: jwt.sign({ id: user._id }, process.env.JWT_SECRET),
         },
@@ -60,9 +63,9 @@ const loginAuth = asyncHandler(async (req, res) => {
       });
     }
   } catch (err) {
-    res.status(401).json({
+    return res.status(500).json({
       message: "Something Went Wrong",
-      error: err,
+      error: err.message,
     });
   }
 });
@@ -136,4 +139,4 @@ const getUser = async (req, res) => {
   }
 };
 
-module.exports = { create_user };
+module.exports = { create_user, login_auth };
