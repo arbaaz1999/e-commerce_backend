@@ -75,6 +75,23 @@ const forgot_password = asyncHandler(async (req, res) => {
   const user = User.findOne({email_id})
 })
 
+const get_all_users = asyncHandler(async (req, res) => {
+  const users = await User.find({})
+  if(users) {
+    return res.status(200).json({
+      message: "Users fetched successfully",
+      data: users,
+      error: null
+    })
+  } else {
+    return res.status(404).json({
+      message: "Users not found!",
+      error: true
+    })
+  }
+
+})
+
 const updateProfile = async (req, res) => {
   try {
     const { name, email, pic, password } = req.body;
@@ -144,4 +161,4 @@ const getUser = async (req, res) => {
   }
 };
 
-module.exports = { create_user, login_auth };
+module.exports = { create_user, login_auth, get_all_users };
