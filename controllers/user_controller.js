@@ -57,10 +57,15 @@ const login_auth = asyncHandler(async (req, res) => {
           mobile_no: user.mobile_no,
           is_admin: user.is_admin,
           pic: user.pic,
-          token: jwt.sign({ id: user._id }, process.env.JWT_SECRET),
+          token: jwt.sign({ id: user._id, is_admin: user.is_admin }, process.env.JWT_SECRET),
         },
         error: null,
       });
+    } else {
+      return res.status(404).json({
+        message: "Wrong Email Id or Password",
+        error: true
+      })
     }
   } catch (err) {
     return res.status(500).json({
@@ -70,16 +75,15 @@ const login_auth = asyncHandler(async (req, res) => {
   }
 });
 
-const forgot_password = asyncHandler(async (req, res) => {
-  const { email_id } = req.body;
-  const user = User.findOne({ email_id })
-})
-
 const get_all_users = asyncHandler(async (req, res) => {
-  const users = await User.find({})
+  let page = req.query.page || 0;
+  let limit = req.query.limit || 2
+  const count = await User.find({}).count();
+  const users = await User.find({}).limit(limit).skip(limit * page)
   if (users) {
     return res.status(200).json({
       message: "Users fetched successfully",
+      total_users: count,
       data: users,
       error: null
     })
@@ -92,39 +96,36 @@ const get_all_users = asyncHandler(async (req, res) => {
 
 })
 
-const updateProfile = async (req, res) => {
+
+// update profile by user from user panel
+const update_profile_by_user = async (req, res) => {
   try {
-    const { name, email, pic, password } = req.body;
-    console.log("user ruquested is ", req.userId);
-    const user = await User.findOne({ _id: req.userId }, (err, doc) => {
-      if (err) return err;
-      else return doc;
-    })
-      .clone()
-      .catch((err) => err);
-    console.log("found user id is ", user._id.toString());
-    if (user._id.toString() !== req.userId) {
-      return res.status(401).json({
-        message: "Unauthorized",
-      });
-    }
+    const { first_name, last_name, email_id, mobile_no, pic, password } = req.body;
+    console.log("user ruquested is ", req.user);
+    const user = await User.findOne({ _id: req.user })
 
     if (user) {
-      user.name = name || user.name;
-      user.email = email || user.email;
+      user.first_name = first_name || user.first_name;
+      user.last_name = last_name || user.last_name;
+      user.email_id = email_id || user.email_id;
+      user.mobile_no = mobile_no || user.mobile_no;
       user.pic = pic || user.pic;
 
       if (password) {
         user.password = password;
       }
-
-      const updatedProfile = await user.save();
+      const updated_profile = await user.save();
       return res.status(200).json({
-        message: "Profile Updated Successfully",
-        data: updatedProfile,
+        message: "User updated successfully",
+        data: updated_profile,
         error: null,
-      });
+      })
+    } else {
+      return res.status(404).json({
+        message: 'User not found'
+      })
     }
+
   } catch (error) {
     console.log(error);
     res.status(400).json({
@@ -134,14 +135,63 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// update profile by admin from admin panel
+const update_profile_by_admin = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { first_name, last_name, email_id, mobile_no, pic, password, is_admin } = req.body;
+    const user = await User.findOne({ _id: id })
+
+    if (user) {
+      user.first_name = first_name || user.first_name;
+      user.last_name = last_name || user.last_name;
+      user.email_id = email_id || user.email_id;
+      user.mobile_no = mobile_no || user.mobile_no;
+      user.is_admin = is_admin || user.is_admin;
+      user.pic = pic || user.pic;
+
+      if (password) {
+        user.password = password;
+      }
+      const updated_profile = await user.save();
+      return res.status(200).json({
+        message: "User updated successfully",
+        data: updated_profile,
+        error: null,
+      })
+    } else {
+      return res.status(404).json({
+        message: 'User not found'
+      })
+    }
+
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      message: "An error occured",
+      error: error,
+    });
+  }
+};
+
+/* 
+  getting a user details from user panel
+*/
+
 const get_user = async (req, res) => {
   try {
-    console.log(req.userId);
-    const user = await User.find({ _id: req.userId });
+    console.log(req.user);
+    const user = await User.findOne({ _id: req.user });
     if (user) {
       return res.status(200).json({
         message: "Success",
-        data: user,
+        data: {
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email_id: user.email_id,
+          mobile_no: user.mobile_no,
+          pic: user.pic
+        },
         error: null,
       });
     } else {
@@ -152,13 +202,54 @@ const get_user = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log("Error inside the catch of getUser is : ", error);
+    console.log("Error inside the catch of getUser is : ", error.message);
     res.status(400).json({
       message: "Something went wrong",
       data: null,
-      error: error,
+      error: error.message,
     });
   }
 };
 
-module.exports = { create_user, login_auth, get_all_users };
+
+/* 
+  getting a user details from admin panel
+*/
+
+const get_user_admin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    console.log(id);
+    const user = await User.findOne({ _id: id });
+    if (user) {
+      return res.status(200).json({
+        message: "Success",
+        data: {
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email_id: user.email_id,
+          mobile_no: user.mobile_no,
+          is_admin: user.is_admin,
+          pic: user.pic
+        },
+        error: null,
+      });
+    } else {
+      return res.status(404).json({
+        message: "User Not Found",
+        data: null,
+        error: true,
+      });
+    }
+  } catch (error) {
+    console.log("Error inside the catch of getUser is : ", error.message);
+    res.status(400).json({
+      message: "Something went wrong",
+      data: null,
+      error: error.message,
+    });
+  }
+};
+
+
+module.exports = { create_user, login_auth, get_all_users, get_user, get_user_admin, update_profile_by_user, update_profile_by_admin };
