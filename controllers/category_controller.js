@@ -34,7 +34,7 @@ const add_category = async_handler(async (req, res) => {
 
 const get_all_categories = async_handler(async (req, res) => {
     try {
-        const all_categories = await Category.find({})
+        const all_categories = await Category.find({}).sort({ "category_name": 1 })
         if (all_categories.length > 0) {
             return res.status(200).json({
                 message: 'Categories fetched successfully',

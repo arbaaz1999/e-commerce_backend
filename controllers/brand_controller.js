@@ -4,7 +4,7 @@ const async_handler = require('express-async-handler');
 
 const add_brand = async_handler(async (req, res) => {
     try {
-        const { brand_name } = req.body;
+        const { brand_name, category } = req.body;
         const check = await Brand.findOne({ brand_name: { "$regex": brand_name, "$options": "i" } });
         if (check) {
             return res.status(403).json({
@@ -12,7 +12,7 @@ const add_brand = async_handler(async (req, res) => {
             })
         }
         if (brand_name) {
-            const new_brand = await Brand.create({ brand_name })
+            const new_brand = await Brand.create({ brand_name, category })
             return res.status(200).json({
                 message: `${new_brand.brand_name} brand created successfully`,
                 data: new_brand,
@@ -34,7 +34,7 @@ const add_brand = async_handler(async (req, res) => {
 
 const get_all_brands = async_handler(async (req, res) => {
     try {
-        const all_brands = await Brand.find({})
+        const all_brands = await Brand.find({}).populate("category", { "category_name": 1, "_id": 1 })
         if (all_brands.length > 0) {
             return res.status(200).json({
                 message: 'Brands fetched successfully',
