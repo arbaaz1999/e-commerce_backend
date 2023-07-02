@@ -2,7 +2,7 @@ const Sub_Category = require('./sub_category_model');
 const mongoose = require('mongoose');
 
 const product_schema = mongoose.Schema({
-    model_no: {
+    model: {
         type: String,
         required: true,
     },
