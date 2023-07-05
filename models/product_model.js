@@ -2,7 +2,7 @@ const Sub_Category = require('./sub_category_model');
 const mongoose = require('mongoose');
 
 const product_schema = mongoose.Schema({
-    model: {
+    product_model: {
         type: String,
         required: true,
     },
@@ -38,11 +38,17 @@ const product_schema = mongoose.Schema({
         type: String,
         required: true,
     },
-    product_images: [{
-        type: String,
+    product_images: {
+        type: [String],
         required: true,
-        maxLength: 5,
-    }]
+        validate: {
+            validator: function (v) {
+                return v.length > 0 && v.length < 6;
+            },
+            message: "You can upload upto 5 images only"
+        },
+        required: [true, 'Upload atleast 1 image']
+    }
 }, { timestamps: true });
 
 product_schema.pre('save', async function (next) {
